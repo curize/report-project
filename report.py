@@ -3,7 +3,16 @@ import argparse
 import json
 import sys
 
-REPORT_TITLE = "Sales report"
+REPORT_TITLES = {"en": "Sales report", "ru": "Отчёт о продажах"}
+DEFAULT_LANG = "en"
+REPORT_TITLE = REPORT_TITLES[DEFAULT_LANG]
+
+
+def get_title(lang=DEFAULT_LANG):
+    """Заголовок отчета на выбранном языке (en или ru)."""
+    if lang not in REPORT_TITLES:
+        raise ValueError(f"Unsupported language: {lang}")
+    return REPORT_TITLES[lang]
 
 
 def load_data(path):
@@ -54,6 +63,8 @@ def build_parser():
     parser.add_argument("data", help="Входной JSON-файл")
     parser.add_argument("-o", "--output", help="Куда записать отчет (JSON)")
     parser.add_argument("--text", action="store_true", help="Вывести текстовую сводку")
+    parser.add_argument("--lang", default=DEFAULT_LANG, choices=sorted(REPORT_TITLES),
+                        help="Язык заголовка отчета")
     return parser
 
 
@@ -65,10 +76,11 @@ def main(argv=None):
         print(f"Error: {error}", file=sys.stderr)
         return 2
     summary = summarize(data)
+    title = get_title(args.lang)
     if args.text:
-        print(text_summary(summary))
+        print(text_summary(summary, title))
     if args.output:
-        write_report(args.output, summary)
+        write_report(args.output, summary, title)
         print(f"Report written to {args.output}")
     if not args.text and not args.output:
         print(summary)

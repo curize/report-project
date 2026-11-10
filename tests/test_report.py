@@ -5,7 +5,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from report import load_data, main, summarize, text_summary, write_report
+from report import get_title, load_data, main, summarize, text_summary, write_report
 
 
 class TempDirCase(unittest.TestCase):
@@ -114,6 +114,31 @@ class CliTextTest(TempDirCase):
     def test_missing_file_returns_2(self):
         code, _ = self.run_main(str(self.dir / "nope.json"), "--text")
         self.assertEqual(code, 2)
+
+
+class TitleTest(unittest.TestCase):
+    def test_english(self):
+        self.assertEqual(get_title("en"), "Sales report")
+
+    def test_russian(self):
+        self.assertEqual(get_title("ru"), "Отчёт о продажах")
+
+    def test_default_is_english(self):
+        self.assertEqual(get_title(), "Sales report")
+
+    def test_unsupported_language(self):
+        with self.assertRaises(ValueError):
+            get_title("de")
+
+
+class CliLangTest(TempDirCase):
+    def test_lang_ru_in_text(self):
+        data = self.write("d.json", json.dumps({"items": [{"name": "A", "qty": 1, "price": 1}]}))
+        out = io.StringIO()
+        with contextlib.redirect_stdout(out):
+            code = main([str(data), "--text", "--lang", "ru"])
+        self.assertEqual(code, 0)
+        self.assertEqual(out.getvalue().splitlines()[0], "Отчёт о продажах")
 
 
 if __name__ == "__main__":
