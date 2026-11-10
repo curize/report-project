@@ -1,9 +1,11 @@
+import contextlib
+import io
 import json
 import tempfile
 import unittest
 from pathlib import Path
 
-from report import load_data, summarize, text_summary, write_report
+from report import load_data, main, summarize, text_summary, write_report
 
 
 class TempDirCase(unittest.TestCase):
@@ -93,6 +95,25 @@ class TextSummaryTest(unittest.TestCase):
 
     def test_custom_title_is_first_line(self):
         self.assertEqual(text_summary(self.summary, "Отчёт").splitlines()[0], "Отчёт")
+
+
+class CliTextTest(TempDirCase):
+    def run_main(self, *args):
+        out = io.StringIO()
+        with contextlib.redirect_stdout(out):
+            code = main(list(args))
+        return code, out.getvalue()
+
+    def test_text_option(self):
+        data = self.write("d.json", json.dumps({"items": [{"name": "A", "qty": 2, "price": 10}]}))
+        code, output = self.run_main(str(data), "--text")
+        self.assertEqual(code, 0)
+        self.assertIn("Items: 1", output)
+        self.assertIn("Total: 20.00", output)
+
+    def test_missing_file_returns_2(self):
+        code, _ = self.run_main(str(self.dir / "nope.json"), "--text")
+        self.assertEqual(code, 2)
 
 
 if __name__ == "__main__":

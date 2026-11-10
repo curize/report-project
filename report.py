@@ -53,6 +53,7 @@ def build_parser():
     parser = argparse.ArgumentParser(description="Генератор отчетов")
     parser.add_argument("data", help="Входной JSON-файл")
     parser.add_argument("-o", "--output", help="Куда записать отчет (JSON)")
+    parser.add_argument("--text", action="store_true", help="Вывести текстовую сводку")
     return parser
 
 
@@ -64,10 +65,12 @@ def main(argv=None):
         print(f"Error: {error}", file=sys.stderr)
         return 2
     summary = summarize(data)
+    if args.text:
+        print(text_summary(summary))
     if args.output:
         write_report(args.output, summary)
         print(f"Report written to {args.output}")
-    else:
+    if not args.text and not args.output:
         print(summary)
     return 0
 
