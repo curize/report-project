@@ -30,9 +30,18 @@ def summarize(data):
     }
 
 
+def write_report(path, summary, title=REPORT_TITLE):
+    """Записывает отчет (заголовок и сводку) в JSON-файл, UTF-8."""
+    report = {"title": title, "summary": summary}
+    with open(path, "w", encoding="utf-8") as f:
+        json.dump(report, f, ensure_ascii=False, indent=2)
+        f.write("\n")
+
+
 def build_parser():
     parser = argparse.ArgumentParser(description="Генератор отчетов")
     parser.add_argument("data", help="Входной JSON-файл")
+    parser.add_argument("-o", "--output", help="Куда записать отчет (JSON)")
     return parser
 
 
@@ -43,7 +52,12 @@ def main(argv=None):
     except (OSError, ValueError) as error:
         print(f"Error: {error}", file=sys.stderr)
         return 2
-    print(summarize(data))
+    summary = summarize(data)
+    if args.output:
+        write_report(args.output, summary)
+        print(f"Report written to {args.output}")
+    else:
+        print(summary)
     return 0
 
 

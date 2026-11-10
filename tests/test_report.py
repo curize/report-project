@@ -3,7 +3,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from report import load_data, summarize
+from report import load_data, summarize, write_report
 
 
 class TempDirCase(unittest.TestCase):
@@ -60,6 +60,21 @@ class SummarizeTest(unittest.TestCase):
     def test_rounding_to_cents(self):
         data = {"items": [{"name": "A", "qty": 3, "price": 0.1}]}
         self.assertEqual(summarize(data)["total"], 0.3)
+
+
+class WriteReportTest(TempDirCase):
+    def test_write_and_read_back(self):
+        summary = {"count": 1, "total": 2.0, "average": 2.0, "top": "Тетрадь"}
+        path = self.dir / "r.json"
+        write_report(path, summary, "Заголовок")
+        saved = json.loads(path.read_text(encoding="utf-8"))
+        self.assertEqual(saved["title"], "Заголовок")
+        self.assertEqual(saved["summary"], summary)
+
+    def test_file_is_utf8(self):
+        path = self.dir / "r.json"
+        write_report(path, {"top": "Тетрадь"}, "Отчёт")
+        self.assertIn("Тетрадь", path.read_text(encoding="utf-8"))
 
 
 if __name__ == "__main__":
