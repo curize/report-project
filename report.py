@@ -15,6 +15,21 @@ def load_data(path):
     return data
 
 
+def summarize(data):
+    """Сводка: число позиций, общая сумма, среднее и самая дорогая позиция."""
+    items = data["items"]
+    if not items:
+        return {"count": 0, "total": 0.0, "average": 0.0, "top": None}
+    costs = [item["qty"] * item["price"] for item in items]
+    total = round(sum(costs), 2)
+    return {
+        "count": len(items),
+        "total": total,
+        "average": round(total / len(items), 2),
+        "top": items[costs.index(max(costs))]["name"],
+    }
+
+
 def build_parser():
     parser = argparse.ArgumentParser(description="Генератор отчетов")
     parser.add_argument("data", help="Входной JSON-файл")
@@ -28,7 +43,7 @@ def main(argv=None):
     except (OSError, ValueError) as error:
         print(f"Error: {error}", file=sys.stderr)
         return 2
-    print(f"{REPORT_TITLE}: {len(data['items'])} items")
+    print(summarize(data))
     return 0
 
 

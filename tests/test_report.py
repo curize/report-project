@@ -3,7 +3,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from report import load_data
+from report import load_data, summarize
 
 
 class TempDirCase(unittest.TestCase):
@@ -41,6 +41,25 @@ class LoadDataTest(TempDirCase):
         text = json.dumps({"items": [{"name": "Тетрадь", "qty": 1, "price": 1}]}, ensure_ascii=False)
         path = self.write("d.json", text)
         self.assertEqual(load_data(path)["items"][0]["name"], "Тетрадь")
+
+
+class SummarizeTest(unittest.TestCase):
+    def test_count_total_average_top(self):
+        data = {"items": [{"name": "A", "qty": 2, "price": 10}, {"name": "B", "qty": 1, "price": 5}]}
+        self.assertEqual(
+            summarize(data),
+            {"count": 2, "total": 25.0, "average": 12.5, "top": "A"},
+        )
+
+    def test_empty_items(self):
+        self.assertEqual(
+            summarize({"items": []}),
+            {"count": 0, "total": 0.0, "average": 0.0, "top": None},
+        )
+
+    def test_rounding_to_cents(self):
+        data = {"items": [{"name": "A", "qty": 3, "price": 0.1}]}
+        self.assertEqual(summarize(data)["total"], 0.3)
 
 
 if __name__ == "__main__":
