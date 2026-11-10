@@ -4,7 +4,9 @@
 
 ## Запуск
 
-    python report.py
+    python report.py data.json              # сводка в виде словаря
+    python report.py data.json --text       # текстовая сводка
+    python report.py data.json -o report.json   # запись отчета в JSON
 
 ## Формат данных
 
