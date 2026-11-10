@@ -3,7 +3,7 @@ import argparse
 import json
 import sys
 
-REPORT_TITLE = "Report"
+REPORT_TITLE = "Sales report"
 
 
 def load_data(path):
