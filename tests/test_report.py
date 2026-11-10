@@ -3,7 +3,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from report import load_data, summarize, write_report
+from report import load_data, summarize, text_summary, write_report
 
 
 class TempDirCase(unittest.TestCase):
@@ -75,6 +75,24 @@ class WriteReportTest(TempDirCase):
         path = self.dir / "r.json"
         write_report(path, {"top": "Тетрадь"}, "Отчёт")
         self.assertIn("Тетрадь", path.read_text(encoding="utf-8"))
+
+
+class TextSummaryTest(unittest.TestCase):
+    def setUp(self):
+        self.summary = {"count": 3, "total": 760.5, "average": 253.5, "top": "Pen"}
+
+    def test_lines(self):
+        lines = text_summary(self.summary, "Title").splitlines()
+        self.assertEqual(lines, [
+            "Title",
+            "Items: 3",
+            "Total: 760.50",
+            "Average: 253.50",
+            "Top item: Pen",
+        ])
+
+    def test_custom_title_is_first_line(self):
+        self.assertEqual(text_summary(self.summary, "Отчёт").splitlines()[0], "Отчёт")
 
 
 if __name__ == "__main__":

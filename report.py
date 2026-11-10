@@ -30,6 +30,17 @@ def summarize(data):
     }
 
 
+def text_summary(summary, title=REPORT_TITLE):
+    """Человекочитаемая текстовая сводка (несколько строк)."""
+    return "\n".join([
+        title,
+        f"Items: {summary['count']}",
+        f"Total: {summary['total']:.2f}",
+        f"Average: {summary['average']:.2f}",
+        f"Top item: {summary['top']}",
+    ])
+
+
 def write_report(path, summary, title=REPORT_TITLE):
     """Записывает отчет (заголовок и сводку) в JSON-файл, UTF-8."""
     report = {"title": title, "summary": summary}
